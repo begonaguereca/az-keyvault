@@ -18,13 +18,11 @@ jobs:
   az-cli-testing:
     runs-on: ubuntu-latest
     steps:
-      - uses: azure/login@v1.4.6
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
       - id: az-cli-testing
         uses: azure/cli@v1.0.7
         with:
           inlineScript: |
+            echo (${{ secrets.AZURE_CREDENTIALS }})
             az login -u beguerec@microsoft.com -p ${{ secrets.AZURE_CREDENTIALS }}
             echo $(az account show)
             az keyvault secret set --vault-name chaseTestVault --name fromActions --value SET
