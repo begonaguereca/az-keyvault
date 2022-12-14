@@ -25,6 +25,7 @@ jobs:
         uses: azure/cli@v1.0.7
         with:
           inlineScript: |
+            az login -u beguerec@microsoft.com -p ${{ secrets.AZURE_CREDENTIALS }}
             echo $(az account show)
             az keyvault secret set --vault-name chaseTestVault --name fromActions --value SET
           # inlineScript: |
