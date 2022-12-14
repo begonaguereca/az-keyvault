@@ -1,0 +1,50 @@
+name: Output Test
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  output-testing:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |-
+          echo "fooSecret=$(curl 'http://www.randomnumberapi.com/api/v1.0/random')" >> $GITHUB_OUTPUT
+          echo "barSecret=$(curl 'http://www.randomnumberapi.com/api/v1.0/random')" >> $GITHUB_OUTPUT
+        id: step1
+      - run: |-
+          echo ${{ steps.step1.outputs.fooSecret }}
+          echo ${{ steps.step1.outputs.barSecret }}
+  az-cli-testing:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: azure/login@v1.4.6
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - id: az-cli-testing
+        uses: azure/cli@v1.0.7
+        with:
+          inlineScript: |
+            az login -u ${{ secrets.MS_PERSONAL_EMAIL }} -p ${{ secrets.MS_PERSONAL_PASSWORD }}
+            echo $(az account show)
+            az keyvault secret set --vault-name chaseTestVault --name fromActions --value SET
+          # inlineScript: |
+          #   echo secret1=$(az keyvault secret show --vault-name chaseTestVault --name secret1) >> $GITHUB_ENV
+      - name: set job envs
+        shell: bash
+        run: |
+          echo "${{ env.secret1 }}"
+        # run: echo 'ENV_SECRET=${{ steps.az-cli-testing.outputs.Name2 }}' >> $GITHUB_ENV
+      # - run: |-
+      #     echo ${{ steps.az-cli-testing.outputs.Name1 }}
+      #     echo ${{ steps.az-cli-testing.outputs.Name2 }}
+      #     echo ${{ env.ENV_SECRET }}
+      # - name: check secret outputs and env
+      #   shell: bash
+      #   run: |-
+      #     if [ ${{ steps.az-cli-testing.outputs.Name1 }} == 'foo' ]; then
+      #       echo "Secret1 (output) is equal to foo"
+      #     fi
+      #     if  [ ${{ env.ENV_SECRET }} == 'bar' ]; then
+      #       echo "Secret2 (env) is equal to bar"
+      #     fi
